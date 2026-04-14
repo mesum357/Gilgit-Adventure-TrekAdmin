@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services — Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-topbar">
+    <h1>Gilgit Adventure Treks — Admin</h1>
+    <div class="topbar-right">
+      <span class="admin-user" id="adminUser"></span>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="index.html">Dashboard</a>
+    <a href="destinations.html">Services</a>
+    <a href="bookings.html">Bookings</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="deals.html">Deals</a>
+    <a href="subscribers.html">Subscribers</a>
+    <a href="messages.html">Messages</a>
+    <a href="videos.html">Videos</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="team.html">Team</a>
+    <a href="users.html">Users</a>
+    <a href="login-logs.html">Login Logs</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>Services</h2>
+        <button class="btn btn-primary" onclick="showAddModal()">+ Add Service</button>
+      </div>
+      <div class="admin-card-body admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Package Type</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Rating</th>
+              <th>Featured</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="destBody">
+            <tr><td colspan="9" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="admin-modal-overlay" id="destModal">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="modalTitle">Add Destination</h3>
+        <button class="admin-modal-close" onclick="closeModal('destModal')">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <form id="destForm">
+          <input type="hidden" id="editId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dName">Name</label>
+              <input type="text" id="dName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="dId">ID (numeric)</label>
+              <input type="number" id="dId" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dCountry">Region</label>
+              <input type="text" id="dCountry" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="dCategory">Category</label>
+              <select id="dCategory" class="form-control" required>
+                <option value="tour">Tour Package</option>
+                <option value="valley">Valley</option>
+                <option value="trek">Trek</option>
+                <option value="lake">Lake</option>
+                <option value="peak">Peak</option>
+                <option value="heritage">Heritage</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dPrice">Price (PKR)</label>
+              <input type="number" id="dPrice" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="dRating">Rating</label>
+              <input type="number" id="dRating" class="form-control" step="0.1" min="0" max="5" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dReviews">Review Count</label>
+              <input type="number" id="dReviews" class="form-control" value="0">
+            </div>
+            <div class="form-group">
+              <label for="dFeatured">Featured</label>
+              <select id="dFeatured" class="form-control">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="dImage">Image URL</label>
+            <input type="url" id="dImage" class="form-control" required>
+            <input type="file" id="dImageFile" accept="image/*" style="margin-top:4px;font-size:0.8rem;">
+          </div>
+          <div class="form-group">
+            <label for="dDesc">Description</label>
+            <textarea id="dDesc" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="dHighlights">Highlights (comma separated)</label>
+            <input type="text" id="dHighlights" class="form-control" placeholder="e.g. Camping, Photography, Trekking">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dMapX">Map X</label>
+              <input type="number" id="dMapX" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="dMapY">Map Y</label>
+              <input type="number" id="dMapY" class="form-control">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('destModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn" onclick="saveDest()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="js/destinations.js"></script>
+</body>
+</html>

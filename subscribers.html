@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribers — Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-topbar">
+    <h1>Gilgit Adventure Treks — Admin</h1>
+    <div class="topbar-right">
+      <span class="admin-user" id="adminUser"></span>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="index.html">Dashboard</a>
+    <a href="destinations.html">Destinations</a>
+    <a href="bookings.html">Bookings</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="deals.html">Deals</a>
+    <a href="subscribers.html">Subscribers</a>
+    <a href="messages.html">Messages</a>
+    <a href="videos.html">Videos</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="team.html">Team</a>
+    <a href="users.html">Users</a>
+    <a href="login-logs.html">Login Logs</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>Newsletter Subscribers</h2>
+      </div>
+      <div class="admin-card-body admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email</th>
+              <th>Subscribed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="subBody">
+            <tr><td colspan="4" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="subPagination"></div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="js/subscribers.js"></script>
+</body>
+</html>

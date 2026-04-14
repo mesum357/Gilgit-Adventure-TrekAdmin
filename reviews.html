@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews — Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-topbar">
+    <h1>Gilgit Adventure Treks — Admin</h1>
+    <div class="topbar-right">
+      <span class="admin-user" id="adminUser"></span>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="index.html">Dashboard</a>
+    <a href="destinations.html">Destinations</a>
+    <a href="bookings.html">Bookings</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="deals.html">Deals</a>
+    <a href="subscribers.html">Subscribers</a>
+    <a href="messages.html">Messages</a>
+    <a href="videos.html">Videos</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="team.html">Team</a>
+    <a href="users.html">Users</a>
+    <a href="login-logs.html">Login Logs</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>Reviews</h2>
+        <button class="btn btn-primary" onclick="showAddModal()">+ Add Review</button>
+      </div>
+      <div class="admin-card-body admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Destination</th>
+              <th>Rating</th>
+              <th>Status</th>
+              <th>Verified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="revBody">
+            <tr><td colspan="7" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="admin-modal-overlay" id="revModal">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="modalTitle">Add Review</h3>
+        <button class="admin-modal-close" onclick="closeModal('revModal')">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <form id="revForm">
+          <input type="hidden" id="editId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rName">Reviewer Name</label>
+              <input type="text" id="rName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="rLocation">Location</label>
+              <input type="text" id="rLocation" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rDest">Destination</label>
+              <input type="text" id="rDest" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="rRating">Rating (1-5)</label>
+              <input type="number" id="rRating" class="form-control" min="1" max="5" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="rAvatar">Avatar URL</label>
+            <input type="url" id="rAvatar" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="rText">Review Text</label>
+            <textarea id="rText" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rVerified">Verified</label>
+              <select id="rVerified" class="form-control">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rStatus">Status</label>
+              <select id="rStatus" class="form-control">
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('revModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveReviewBtn" onclick="saveReview()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="js/reviews.js"></script>
+</body>
+</html>

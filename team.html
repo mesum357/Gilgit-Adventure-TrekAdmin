@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team — Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-topbar">
+    <h1>Gilgit Adventure Treks — Admin</h1>
+    <div class="topbar-right">
+      <span class="admin-user" id="adminUser"></span>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="index.html">Dashboard</a>
+    <a href="destinations.html">Destinations</a>
+    <a href="bookings.html">Bookings</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="deals.html">Deals</a>
+    <a href="subscribers.html">Subscribers</a>
+    <a href="messages.html">Messages</a>
+    <a href="videos.html">Videos</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="team.html">Team</a>
+    <a href="users.html">Users</a>
+    <a href="login-logs.html">Login Logs</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>Team Members</h2>
+        <button class="btn btn-primary" onclick="showAddModal()">+ Add Member</button>
+      </div>
+      <div class="admin-card-body admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Order</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="teamBody">
+            <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="admin-modal-overlay" id="teamModal">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="modalTitle">Add Team Member</h3>
+        <button class="admin-modal-close" onclick="closeModal('teamModal')">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <form id="teamForm">
+          <input type="hidden" id="editId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tName">Name</label>
+              <input type="text" id="tName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="tRole">Role</label>
+              <input type="text" id="tRole" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="tBio">Bio</label>
+            <textarea id="tBio" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="tImage">Photo URL</label>
+            <input type="url" id="tImage" class="form-control" required>
+            <input type="file" id="tImageFile" accept="image/*" style="margin-top:4px;font-size:0.8rem;">
+          </div>
+          <div class="form-group">
+            <label for="tOrder">Sort Order</label>
+            <input type="number" id="tOrder" class="form-control" value="0">
+          </div>
+        </form>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('teamModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveMemberBtn" onclick="saveMember()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="js/team.js"></script>
+</body>
+</html>

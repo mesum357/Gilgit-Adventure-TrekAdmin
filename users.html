@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users — Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .user-filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .user-filters input { padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; min-width: 220px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
+    .user-avatar-placeholder { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; font-weight: 600; }
+    .btn-danger { background: #dc2626; color: #fff; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    .btn-danger:hover { background: #b91c1c; }
+    .stat-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .mini-stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; min-width: 120px; }
+    .mini-stat .val { font-size: 1.5rem; font-weight: 700; color: #1B4332; }
+    .mini-stat .lbl { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+    .user-email { color: #64748b; font-size: 0.85rem; }
+    .user-phone { color: #94a3b8; font-size: 0.8rem; }
+
+    /* Confirm delete modal */
+    .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box { background: #fff; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%; text-align: center; }
+    .confirm-box h3 { margin-bottom: 0.5rem; }
+    .confirm-box p { color: #64748b; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .confirm-actions { display: flex; gap: 0.75rem; justify-content: center; }
+    .confirm-actions .btn { padding: 0.5rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; border: none; }
+    .btn-cancel { background: #e2e8f0; color: #334155; }
+    .btn-confirm-delete { background: #dc2626; color: #fff; }
+    .btn-confirm-delete:hover { background: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="admin-topbar">
+    <h1>Gilgit Adventure Treks — Admin</h1>
+    <div class="topbar-right">
+      <span class="admin-user" id="adminUser"></span>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="index.html">Dashboard</a>
+    <a href="destinations.html">Services</a>
+    <a href="bookings.html">Bookings</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="deals.html">Deals</a>
+    <a href="subscribers.html">Subscribers</a>
+    <a href="messages.html">Messages</a>
+    <a href="videos.html">Videos</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="team.html">Team</a>
+    <a href="users.html">Users</a>
+    <a href="login-logs.html">Login Logs</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="admin-content">
+    <!-- Stats -->
+    <div class="stat-row" id="userStats"></div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>Registered Users</h2>
+      </div>
+      <div class="admin-card-body">
+        <div class="user-filters">
+          <input type="text" id="filterSearch" placeholder="Search by name, email, or phone...">
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody">
+              <tr><td colspan="7" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="usersPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div class="confirm-overlay" id="confirmModal">
+    <div class="confirm-box">
+      <h3>Delete User</h3>
+      <p>Are you sure you want to delete <strong id="confirmUserName"></strong>? This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn btn-confirm-delete" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script>
+    initAdminLayout();
+
+    var allUsers = [];
+    var currentPage = 1;
+    var deleteUserId = null;
+
+    function getInitials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+    }
+
+    function getFilteredUsers() {
+      var search = document.getElementById('filterSearch').value.toLowerCase().trim();
+      if (!search) return allUsers;
+      return allUsers.filter(function(u) {
+        var haystack = ((u.name || '') + ' ' + (u.email || '') + ' ' + (u.phone || '') + ' ' + (u.location || '')).toLowerCase();
+        return haystack.indexOf(search) !== -1;
+      });
+    }
+
+    function renderStats() {
+      var total = allUsers.length;
+      var today = new Date().toDateString();
+      var todayCount = allUsers.filter(function(u) { return new Date(u.createdAt).toDateString() === today; }).length;
+      var thisMonth = new Date().getMonth();
+      var thisYear = new Date().getFullYear();
+      var monthCount = allUsers.filter(function(u) {
+        var d = new Date(u.createdAt);
+        return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+      }).length;
+      var withPhone = allUsers.filter(function(u) { return u.phone && u.phone.trim(); }).length;
+
+      document.getElementById('userStats').innerHTML =
+        '<div class="mini-stat"><div class="val">' + total + '</div><div class="lbl">Total Users</div></div>' +
+        '<div class="mini-stat"><div class="val">' + todayCount + '</div><div class="lbl">Joined Today</div></div>' +
+        '<div class="mini-stat"><div class="val">' + monthCount + '</div><div class="lbl">This Month</div></div>' +
+        '<div class="mini-stat"><div class="val">' + withPhone + '</div><div class="lbl">With Phone</div></div>';
+    }
+
+    function renderUsers() {
+      var filtered = getFilteredUsers();
+      var p = paginate(filtered, currentPage, 15);
+      var tbody = document.getElementById('usersBody');
+
+      if (p.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">No users found</td></tr>';
+        renderPagination('usersPagination', 1, 1, function() {});
+        return;
+      }
+
+      tbody.innerHTML = p.data.map(function(u) {
+        var avatarHtml = u.avatar
+          ? '<img class="user-avatar" src="' + escapeHtml(u.avatar) + '" alt="' + escapeHtml(u.name) + '" onerror="this.outerHTML=\'<div class=user-avatar-placeholder>' + escapeHtml(getInitials(u.name)) + '</div>\'">'
+          : '<div class="user-avatar-placeholder">' + escapeHtml(getInitials(u.name)) + '</div>';
+
+        return '<tr>' +
+          '<td>' + avatarHtml + '</td>' +
+          '<td><strong>' + escapeHtml(u.name || '—') + '</strong></td>' +
+          '<td><span class="user-email">' + escapeHtml(u.email || '—') + '</span></td>' +
+          '<td><span class="user-phone">' + escapeHtml(u.phone || '—') + '</span></td>' +
+          '<td>' + escapeHtml(u.location || '—') + '</td>' +
+          '<td>' + formatDate(u.createdAt) + '</td>' +
+          '<td><button class="btn-danger" onclick="confirmDelete(\'' + u._id + '\', \'' + escapeHtml(u.name || u.email) + '\')">Delete</button></td>' +
+        '</tr>';
+      }).join('');
+
+      renderPagination('usersPagination', p.page, p.totalPages, function(pg) {
+        currentPage = pg;
+        renderUsers();
+      });
+    }
+
+    function confirmDelete(id, name) {
+      deleteUserId = id;
+      document.getElementById('confirmUserName').textContent = name;
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirm() {
+      deleteUserId = null;
+      document.getElementById('confirmModal').classList.remove('open');
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+      if (!deleteUserId) return;
+      try {
+        await apiCall('/auth/users/' + deleteUserId, { method: 'DELETE' });
+        allUsers = allUsers.filter(function(u) { return u._id !== deleteUserId; });
+        closeConfirm();
+        renderStats();
+        renderUsers();
+      } catch (err) {
+        alert('Failed to delete user: ' + err.message);
+        closeConfirm();
+      }
+    });
+
+    // Search filter
+    var searchTimer = null;
+    document.getElementById('filterSearch').addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function() { currentPage = 1; renderUsers(); }, 300);
+    });
+
+    // Close confirm on overlay click
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+      if (e.target === this) closeConfirm();
+    });
+
+    // Load data
+    (async function() {
+      try {
+        allUsers = await apiCall('/auth/users');
+        renderStats();
+        renderUsers();
+      } catch (err) {
+        console.error('Failed to load users:', err);
+        document.getElementById('usersBody').innerHTML =
+          '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Failed to load users</td></tr>';
+      }
+    })();
+  </script>
+</body>
+</html>

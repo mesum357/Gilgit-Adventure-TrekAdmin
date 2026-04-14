@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Logs — Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .log-filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .log-filters select, .log-filters input { padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; }
+    .badge-success { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+    .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+    .badge-admin { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+    .badge-user { background: #f3e8ff; color: #6b21a8; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+    .log-ip { font-family: monospace; font-size: 0.8rem; color: #64748b; }
+    .log-ua { font-size: 0.75rem; color: #94a3b8; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stat-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .mini-stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; min-width: 120px; }
+    .mini-stat .val { font-size: 1.5rem; font-weight: 700; color: #1B4332; }
+    .mini-stat .lbl { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="admin-topbar">
+    <h1>Gilgit Adventure Treks — Admin</h1>
+    <div class="topbar-right">
+      <span class="admin-user" id="adminUser"></span>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="index.html">Dashboard</a>
+    <a href="destinations.html">Services</a>
+    <a href="bookings.html">Bookings</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="deals.html">Deals</a>
+    <a href="subscribers.html">Subscribers</a>
+    <a href="messages.html">Messages</a>
+    <a href="videos.html">Videos</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="team.html">Team</a>
+    <a href="users.html">Users</a>
+    <a href="login-logs.html">Login Logs</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="admin-content">
+    <!-- Stats -->
+    <div class="stat-row" id="logStats"></div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>Login History</h2>
+      </div>
+      <div class="admin-card-body">
+        <!-- Filters -->
+        <div class="log-filters">
+          <select id="filterType">
+            <option value="all">All Types</option>
+            <option value="admin">Admin Only</option>
+            <option value="user">User Only</option>
+          </select>
+          <select id="filterStatus">
+            <option value="all">All Status</option>
+            <option value="success">Successful</option>
+            <option value="failed">Failed</option>
+          </select>
+          <input type="text" id="filterSearch" placeholder="Search by name, email, or IP...">
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Type</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>IP Address</th>
+                <th>Browser / Device</th>
+              </tr>
+            </thead>
+            <tbody id="logsBody">
+              <tr><td colspan="7" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="logsPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script>
+    initAdminLayout();
+
+    let allLogs = [];
+    let currentPage = 1;
+
+    function parseUA(ua) {
+      if (!ua) return 'Unknown';
+      // Extract browser
+      let browser = 'Unknown';
+      if (ua.indexOf('Edg/') > -1) browser = 'Edge';
+      else if (ua.indexOf('Chrome/') > -1) browser = 'Chrome';
+      else if (ua.indexOf('Firefox/') > -1) browser = 'Firefox';
+      else if (ua.indexOf('Safari/') > -1 && ua.indexOf('Chrome') === -1) browser = 'Safari';
+      else if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident') > -1) browser = 'IE';
+
+      // Extract OS
+      let os = 'Unknown';
+      if (ua.indexOf('Windows') > -1) os = 'Windows';
+      else if (ua.indexOf('Mac OS') > -1) os = 'macOS';
+      else if (ua.indexOf('Android') > -1) os = 'Android';
+      else if (ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1) os = 'iOS';
+      else if (ua.indexOf('Linux') > -1) os = 'Linux';
+
+      return browser + ' / ' + os;
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' }) +
+        ' ' + d.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getFilteredLogs() {
+      const typeFilter = document.getElementById('filterType').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      const search = document.getElementById('filterSearch').value.toLowerCase().trim();
+
+      return allLogs.filter(function(log) {
+        if (typeFilter !== 'all' && log.userType !== typeFilter) return false;
+        if (statusFilter === 'success' && !log.success) return false;
+        if (statusFilter === 'failed' && log.success) return false;
+        if (search) {
+          const haystack = ((log.username || '') + ' ' + (log.email || '') + ' ' + (log.ip || '')).toLowerCase();
+          if (haystack.indexOf(search) === -1) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderStats() {
+      const total = allLogs.length;
+      const adminLogins = allLogs.filter(l => l.userType === 'admin' && l.success).length;
+      const userLogins = allLogs.filter(l => l.userType === 'user' && l.success).length;
+      const failed = allLogs.filter(l => !l.success).length;
+      const today = new Date().toDateString();
+      const todayCount = allLogs.filter(l => new Date(l.createdAt).toDateString() === today).length;
+
+      document.getElementById('logStats').innerHTML =
+        '<div class="mini-stat"><div class="val">' + total + '</div><div class="lbl">Total Logs</div></div>' +
+        '<div class="mini-stat"><div class="val">' + adminLogins + '</div><div class="lbl">Admin Logins</div></div>' +
+        '<div class="mini-stat"><div class="val">' + userLogins + '</div><div class="lbl">User Logins</div></div>' +
+        '<div class="mini-stat"><div class="val" style="color:#dc2626;">' + failed + '</div><div class="lbl">Failed Attempts</div></div>' +
+        '<div class="mini-stat"><div class="val">' + todayCount + '</div><div class="lbl">Today</div></div>';
+    }
+
+    function renderLogs() {
+      const filtered = getFilteredLogs();
+      const p = paginate(filtered, currentPage, 20);
+      const tbody = document.getElementById('logsBody');
+
+      if (p.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">No login logs found</td></tr>';
+        renderPagination('logsPagination', 1, 1, function() {});
+        return;
+      }
+
+      tbody.innerHTML = p.data.map(function(log) {
+        const typeBadge = log.userType === 'admin'
+          ? '<span class="badge-admin">Admin</span>'
+          : '<span class="badge-user">User</span>';
+        const statusBadge = log.success
+          ? '<span class="badge-success">Success</span>'
+          : '<span class="badge-fail">Failed' + (log.failReason ? ' — ' + escapeHtml(log.failReason) : '') + '</span>';
+
+        return '<tr>' +
+          '<td>' + formatDateTime(log.createdAt) + '</td>' +
+          '<td>' + typeBadge + '</td>' +
+          '<td><strong>' + escapeHtml(log.username || '—') + '</strong></td>' +
+          '<td>' + escapeHtml(log.email || '—') + '</td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td><span class="log-ip">' + escapeHtml(log.ip || '—') + '</span></td>' +
+          '<td><span class="log-ua" title="' + escapeHtml(log.userAgent || '') + '">' + escapeHtml(parseUA(log.userAgent)) + '</span></td>' +
+        '</tr>';
+      }).join('');
+
+      renderPagination('logsPagination', p.page, p.totalPages, function(pg) {
+        currentPage = pg;
+        renderLogs();
+      });
+    }
+
+    // Filter event listeners
+    document.getElementById('filterType').addEventListener('change', function() { currentPage = 1; renderLogs(); });
+    document.getElementById('filterStatus').addEventListener('change', function() { currentPage = 1; renderLogs(); });
+    var searchTimer = null;
+    document.getElementById('filterSearch').addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function() { currentPage = 1; renderLogs(); }, 300);
+    });
+
+    // Load data
+    (async () => {
+      try {
+        allLogs = await apiCall('/auth/login-logs');
+        renderStats();
+        renderLogs();
+      } catch (err) {
+        console.error('Failed to load login logs:', err);
+        document.getElementById('logsBody').innerHTML =
+          '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Failed to load login logs</td></tr>';
+      }
+    })();
+  </script>
+</body>
+</html>
