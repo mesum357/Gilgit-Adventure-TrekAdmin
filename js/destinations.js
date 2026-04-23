@@ -40,7 +40,44 @@ function showAddModal() {
   document.getElementById('modalTitle').textContent = 'Add Service';
   document.getElementById('destForm').reset();
   document.getElementById('editId').value = '';
+  document.getElementById('itineraryRows').innerHTML = '';
+  document.getElementById('dGallery').value = '';
+  document.getElementById('dIncludes').value = '';
+  document.getElementById('dExcludes').value = '';
+  document.getElementById('dDuration').value = '';
+  document.getElementById('dGroupSize').value = '';
+  document.getElementById('dDifficulty').value = '';
+  document.getElementById('dBestSeason').value = '';
+  document.getElementById('dRoute').value = '';
   openModal('destModal');
+}
+
+/* ── Itinerary dynamic rows ── */
+function addItineraryRow(day, title, desc) {
+  var container = document.getElementById('itineraryRows');
+  var row = document.createElement('div');
+  row.className = 'form-row';
+  row.style.cssText = 'align-items:flex-start;margin-bottom:6px;gap:6px;';
+  row.innerHTML =
+    '<input type="text" class="form-control itin-day" placeholder="Day" value="' + (day || '') + '" style="width:60px;flex:none;">' +
+    '<input type="text" class="form-control itin-title" placeholder="Title" value="' + (title || '') + '" style="flex:1;">' +
+    '<input type="text" class="form-control itin-desc" placeholder="Description" value="' + (desc || '') + '" style="flex:2;">' +
+    '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="flex:none;">×</button>';
+  container.appendChild(row);
+}
+
+function getItineraryFromForm() {
+  var rows = document.querySelectorAll('#itineraryRows .form-row');
+  var itinerary = [];
+  rows.forEach(function(row) {
+    var day = row.querySelector('.itin-day').value.trim();
+    var title = row.querySelector('.itin-title').value.trim();
+    var desc = row.querySelector('.itin-desc').value.trim();
+    if (day || title || desc) {
+      itinerary.push({ day: day, title: title, description: desc });
+    }
+  });
+  return itinerary;
 }
 
 function editDest(id) {
@@ -61,6 +98,26 @@ function editDest(id) {
   document.getElementById('dHighlights').value = (d.highlights || []).join(', ');
   document.getElementById('dMapX').value = d.mapX || '';
   document.getElementById('dMapY').value = d.mapY || '';
+
+  // Tour-specific fields
+  document.getElementById('dDuration').value = d.duration || '';
+  document.getElementById('dGroupSize').value = d.groupSize || '';
+  document.getElementById('dDifficulty').value = d.difficulty || '';
+  document.getElementById('dBestSeason').value = d.bestSeason || '';
+  document.getElementById('dRoute').value = (d.route || []).join(', ');
+  document.getElementById('dGallery').value = (d.gallery || []).join('\n');
+  document.getElementById('dIncludes').value = (d.includes || []).join('\n');
+  document.getElementById('dExcludes').value = (d.excludes || []).join('\n');
+
+  // Populate itinerary rows
+  var itinContainer = document.getElementById('itineraryRows');
+  itinContainer.innerHTML = '';
+  if (d.itinerary && d.itinerary.length > 0) {
+    d.itinerary.forEach(function(item) {
+      addItineraryRow(item.day, item.title, item.description);
+    });
+  }
+
   openModal('destModal');
 }
 
@@ -80,8 +137,21 @@ async function saveDest() {
     description: document.getElementById('dDesc').value.trim(),
     highlights: document.getElementById('dHighlights').value.split(',').map(s => s.trim()).filter(Boolean),
     mapX: parseInt(document.getElementById('dMapX').value) || 0,
-    mapY: parseInt(document.getElementById('dMapY').value) || 0
+    mapY: parseInt(document.getElementById('dMapY').value) || 0,
+    // Tour-specific fields
+    duration: document.getElementById('dDuration').value.trim() || undefined,
+    groupSize: document.getElementById('dGroupSize').value.trim() || undefined,
+    difficulty: document.getElementById('dDifficulty').value || undefined,
+    bestSeason: document.getElementById('dBestSeason').value.trim() || undefined,
+    route: document.getElementById('dRoute').value.split(',').map(s => s.trim()).filter(Boolean),
+    gallery: document.getElementById('dGallery').value.split('\n').map(s => s.trim()).filter(Boolean),
+    includes: document.getElementById('dIncludes').value.split('\n').map(s => s.trim()).filter(Boolean),
+    excludes: document.getElementById('dExcludes').value.split('\n').map(s => s.trim()).filter(Boolean),
+    itinerary: getItineraryFromForm()
   };
+
+  // Remove undefined fields so they don't overwrite existing data
+  Object.keys(body).forEach(function(k) { if (body[k] === undefined) delete body[k]; });
 
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving...';

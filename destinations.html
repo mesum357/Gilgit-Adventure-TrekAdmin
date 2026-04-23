@@ -143,6 +143,58 @@
               <input type="number" id="dMapY" class="form-control">
             </div>
           </div>
+
+          <!-- Tour-specific fields -->
+          <hr style="margin:1rem 0;border:none;border-top:1px solid #e2e8f0;">
+          <h4 style="margin:0 0 0.75rem;color:#475569;font-size:0.9rem;">Tour Details (optional)</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dDuration">Duration</label>
+              <input type="text" id="dDuration" class="form-control" placeholder="e.g. 10 Days / 9 Nights">
+            </div>
+            <div class="form-group">
+              <label for="dGroupSize">Group Size</label>
+              <input type="text" id="dGroupSize" class="form-control" placeholder="e.g. 6–15 people">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dDifficulty">Difficulty</label>
+              <select id="dDifficulty" class="form-control">
+                <option value="">None</option>
+                <option value="Easy">Easy</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Challenging">Challenging</option>
+                <option value="Extreme">Extreme</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dBestSeason">Best Season</label>
+              <input type="text" id="dBestSeason" class="form-control" placeholder="e.g. Spring–Autumn">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="dRoute">Route (comma separated)</label>
+            <input type="text" id="dRoute" class="form-control" placeholder="e.g. Islamabad, Hunza, Skardu">
+          </div>
+          <div class="form-group">
+            <label for="dGallery">Gallery Image URLs (one per line)</label>
+            <textarea id="dGallery" class="form-control" rows="3" placeholder="Paste image URLs, one per line"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="dIncludes">Includes (one per line)</label>
+            <textarea id="dIncludes" class="form-control" rows="3" placeholder="e.g. All transport&#10;Accommodation&#10;All meals"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="dExcludes">Excludes (one per line)</label>
+            <textarea id="dExcludes" class="form-control" rows="3" placeholder="e.g. International flights&#10;Personal expenses"></textarea>
+          </div>
+
+          <!-- Dynamic Itinerary -->
+          <div class="form-group">
+            <label>Itinerary <button type="button" class="btn btn-sm btn-outline" onclick="addItineraryRow()" style="margin-left:8px;font-size:0.75rem;">+ Add Day</button></label>
+            <div id="itineraryRows"></div>
+          </div>
         </form>
       </div>
       <div class="admin-modal-footer">
