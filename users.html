@@ -17,7 +17,6 @@
     .mini-stat .val { font-size: 1.5rem; font-weight: 700; color: #1B4332; }
     .mini-stat .lbl { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
     .user-email { color: #64748b; font-size: 0.85rem; }
-    .user-phone { color: #94a3b8; font-size: 0.8rem; }
 
     /* Confirm delete modal */
     .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
@@ -66,7 +65,7 @@
       </div>
       <div class="admin-card-body">
         <div class="user-filters">
-          <input type="text" id="filterSearch" placeholder="Search by name, email, or phone...">
+          <input type="text" id="filterSearch" placeholder="Search by name or email...">
         </div>
 
         <div class="admin-table-wrap">
@@ -76,14 +75,13 @@
                 <th>Avatar</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Phone</th>
-                <th>Location</th>
+                <th>Password</th>
                 <th>Registered</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="usersBody">
-              <tr><td colspan="7" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
+              <tr><td colspan="6" style="text-align:center;color:#94a3b8;">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -121,7 +119,7 @@
       var search = document.getElementById('filterSearch').value.toLowerCase().trim();
       if (!search) return allUsers;
       return allUsers.filter(function(u) {
-        var haystack = ((u.name || '') + ' ' + (u.email || '') + ' ' + (u.phone || '') + ' ' + (u.location || '')).toLowerCase();
+        var haystack = ((u.name || '') + ' ' + (u.email || '')).toLowerCase();
         return haystack.indexOf(search) !== -1;
       });
     }
@@ -136,13 +134,10 @@
         var d = new Date(u.createdAt);
         return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
       }).length;
-      var withPhone = allUsers.filter(function(u) { return u.phone && u.phone.trim(); }).length;
-
       document.getElementById('userStats').innerHTML =
         '<div class="mini-stat"><div class="val">' + total + '</div><div class="lbl">Total Users</div></div>' +
         '<div class="mini-stat"><div class="val">' + todayCount + '</div><div class="lbl">Joined Today</div></div>' +
-        '<div class="mini-stat"><div class="val">' + monthCount + '</div><div class="lbl">This Month</div></div>' +
-        '<div class="mini-stat"><div class="val">' + withPhone + '</div><div class="lbl">With Phone</div></div>';
+        '<div class="mini-stat"><div class="val">' + monthCount + '</div><div class="lbl">This Month</div></div>';
     }
 
     function renderUsers() {
@@ -151,7 +146,7 @@
       var tbody = document.getElementById('usersBody');
 
       if (p.data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">No users found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">No users found</td></tr>';
         renderPagination('usersPagination', 1, 1, function() {});
         return;
       }
@@ -165,8 +160,7 @@
           '<td>' + avatarHtml + '</td>' +
           '<td><strong>' + escapeHtml(u.name || '—') + '</strong></td>' +
           '<td><span class="user-email">' + escapeHtml(u.email || '—') + '</span></td>' +
-          '<td><span class="user-phone">' + escapeHtml(u.phone || '—') + '</span></td>' +
-          '<td>' + escapeHtml(u.location || '—') + '</td>' +
+          '<td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:0.8rem;">' + escapeHtml(u.plainPassword || '—') + '</code></td>' +
           '<td>' + formatDate(u.createdAt) + '</td>' +
           '<td><button class="btn-danger" onclick="confirmDelete(\'' + u._id + '\', \'' + escapeHtml(u.name || u.email) + '\')">Delete</button></td>' +
         '</tr>';
@@ -224,7 +218,7 @@
       } catch (err) {
         console.error('Failed to load users:', err);
         document.getElementById('usersBody').innerHTML =
-          '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Failed to load users</td></tr>';
+          '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Failed to load users</td></tr>';
       }
     })();
   </script>
