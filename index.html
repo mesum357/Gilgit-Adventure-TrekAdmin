@@ -20,7 +20,7 @@
     <a href="destinations.html">Destinations</a>
     <a href="bookings.html">Bookings</a>
     <a href="reviews.html">Reviews</a>
-    <a href="deals.html">Deals</a>
+
     <a href="subscribers.html">Subscribers</a>
     <a href="messages.html">Messages</a>
     <a href="videos.html">Videos</a>
@@ -36,7 +36,6 @@
       <div class="stat-card"><div class="stat-label">Destinations</div><div class="stat-value" id="statDest">—</div></div>
       <div class="stat-card"><div class="stat-label">Bookings</div><div class="stat-value" id="statBook">—</div></div>
       <div class="stat-card"><div class="stat-label">Reviews</div><div class="stat-value" id="statReview">—</div></div>
-      <div class="stat-card"><div class="stat-label">Deals</div><div class="stat-value" id="statDeal">—</div></div>
       <div class="stat-card"><div class="stat-label">Subscribers</div><div class="stat-value" id="statSub">—</div></div>
       <div class="stat-card"><div class="stat-label">Messages</div><div class="stat-value" id="statMsg">—</div></div>
       <div class="stat-card"><div class="stat-label">Videos</div><div class="stat-value" id="statVideo">—</div></div>
@@ -83,11 +82,10 @@
           }
         };
 
-        const [destinations, bookings, reviews, deals, subscribers, messages, videos, gallery, team] = await Promise.all([
+        const [destinations, bookings, reviews, subscribers, messages, videos, gallery, team] = await Promise.all([
           loadStat('/destinations', 'statDest'),
           loadStat('/bookings', 'statBook'),
-          loadStat('/reviews/all', 'statReview'), // FIX: Use /reviews/all for admin
-          loadStat('/deals', 'statDeal'),
+          loadStat('/reviews/all', 'statReview'),
           loadStat('/subscribers', 'statSub'),
           loadStat('/contact', 'statMsg'),
           loadStat('/videos', 'statVideo'),
